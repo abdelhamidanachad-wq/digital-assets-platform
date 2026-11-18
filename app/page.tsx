@@ -1,91 +1,121 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-const copy = {
-  EN: {
-    nav: ["MGT Coin", "Ecosystem", "Community", "Roadmap"],
-    eyebrow: "A DIGITAL ASSET ECOSYSTEM",
-    title: "A new dimension\nof digital value.",
-    intro: "Discover Maghreb Token — a community-led digital asset concept connecting utility, learning and participation.",
-    explore: "Explore the ecosystem",
-    learn: "Discover MGT Coin",
-    label: "PROJECT STATUS",
-    status: "Concept & demo environment",
-    coin: "MGT COIN",
-    coinText: "A utility-focused token concept designed to connect the ecosystem.",
-    ecosystem: "THE ECOSYSTEM",
-    ecosystemText: "A connected experience for discovery, education and community participation.",
-    community: "COMMUNITY",
-    communityText: "Learn, contribute and progress through meaningful participation.",
-    pillars: ["Utility-led vision", "Transparent information", "Community participation"],
-    roadmap: "A considered roadmap",
-    roadmapText: "The project is presented as a concept demo. Milestones, token parameters and integrations remain subject to review and approval.",
-    locations: "A connected perspective",
-    footer: "Concept demonstration. Not an offer to buy, sell or trade financial assets."
-  },
-  FR: {
-    nav: ["MGT Coin", "Écosystème", "Communauté", "Feuille de route"],
-    eyebrow: "UN ÉCOSYSTÈME D’ACTIFS NUMÉRIQUES",
-    title: "Une nouvelle dimension\nde la valeur numérique.",
-    intro: "Découvrez Maghreb Token — un concept d’actif numérique communautaire reliant utilité, apprentissage et participation.",
-    explore: "Explorer l’écosystème",
-    learn: "Découvrir MGT Coin",
-    label: "STATUT DU PROJET",
-    status: "Concept et environnement démo",
-    coin: "MGT COIN",
-    coinText: "Un concept de token utilitaire conçu pour connecter l’écosystème.",
-    ecosystem: "L’ÉCOSYSTÈME",
-    ecosystemText: "Une expérience connectée dédiée à la découverte, à l’éducation et à la communauté.",
-    community: "COMMUNAUTÉ",
-    communityText: "Apprendre, contribuer et progresser grâce à une participation constructive.",
-    pillars: ["Vision axée sur l’utilité", "Information transparente", "Participation communautaire"],
-    roadmap: "Une feuille de route réfléchie",
-    roadmapText: "Le projet est présenté comme une démo conceptuelle. Les étapes, paramètres du token et intégrations restent à examiner et à approuver.",
-    locations: "Une perspective connectée",
-    footer: "Démonstration conceptuelle. Ceci ne constitue pas une offre d’achat, de vente ou de négociation d’actifs financiers."
-  },
+const languages = [
+  ["AR", "العربية"], ["FR", "Français"], ["EN", "English"], ["IT", "Italiano"],
+  ["RU", "Русский"], ["TR", "Türkçe"], ["JA", "日本語"], ["ES", "Español"],
+  ["PT", "Português"], ["ZH", "中文"], ["DE", "Deutsch"],
+] as const;
+type Lang = typeof languages[number][0];
+
+const translations: Record<Lang, {nav:string[];eyebrow:string;headline:string;intro:string;join:string;explore:string;status:string;about:string;vision:string;ecosystem:string;community:string;market:string;events:string;roadmap:string;prelaunch:string;poll:string;who:string;learn:string;utility:string;launch:string;subscribe:string;email:string;vote:string;results:string;next:string;disclaimer:string}> = {
+  EN:{nav:["Project","MGT Coin","Ecosystem","Market demo","Community","Events","Who we are"],eyebrow:"THE NEXT CHAPTER OF DIGITAL VALUE",headline:"A new dimension of\ndigital participation.",intro:"MAGHREB TOKEN is building a community-first digital asset ecosystem connecting education, utility, culture and meaningful participation.",join:"Join the pre-launch",explore:"Explore the project",status:"PROJECT STATUS",about:"A project built for what comes next",vision:"A regional vision with a global outlook",ecosystem:"One ecosystem. Multiple ways to participate.",community:"The community is the foundation",market:"Market overview · simulated demo",events:"Meet the community in real life",roadmap:"The journey to launch",prelaunch:"Be part of the 2027 launch",poll:"Community pulse",who:"Who we are",learn:"Learn before you participate",utility:"Utility before speculation",launch:"TARGET LAUNCH · 2027",subscribe:"Register interest",email:"Your email address",vote:"Submit my vote",results:"View results",next:"Next event",disclaimer:"Concept and demonstration environment. Market figures are simulated examples, not live prices or investment advice. Token parameters, partnerships, regulatory status and launch milestones are subject to confirmation."},
+  FR:{nav:["Projet","MGT Coin","Écosystème","Démo marché","Communauté","Événements","Qui sommes-nous"],eyebrow:"LE NOUVEAU CHAPITRE DE LA VALEUR NUMÉRIQUE",headline:"Une nouvelle dimension\nde participation numérique.",intro:"MAGHREB TOKEN construit un écosystème d’actifs numériques centré sur la communauté, reliant éducation, utilité, culture et participation.",join:"Rejoindre la pré-lancement",explore:"Découvrir le projet",status:"STATUT DU PROJET",about:"Un projet tourné vers l’avenir",vision:"Une vision régionale, une ambition mondiale",ecosystem:"Un écosystème. Plusieurs façons de participer.",community:"La communauté est le fondement",market:"Aperçu du marché · démo simulée",events:"Rencontrer la communauté",roadmap:"Le chemin vers le lancement",prelaunch:"Participez au lancement 2027",poll:"La voix de la communauté",who:"Qui sommes-nous",learn:"Apprendre avant de participer",utility:"L’utilité avant la spéculation",launch:"LANCEMENT CIBLE · 2027",subscribe:"S’inscrire",email:"Votre adresse e-mail",vote:"Envoyer mon vote",results:"Voir les résultats",next:"Prochain événement",disclaimer:"Environnement conceptuel et démonstration. Les chiffres du marché sont simulés, non des cours en direct ni des conseils financiers. Les paramètres du token, partenariats, statuts réglementaires et dates restent à confirmer."},
+  AR:{nav:["المشروع","عملة MGT","المنظومة","عرض السوق","المجتمع","الفعاليات","من نحن"],eyebrow:"فصل جديد من القيمة الرقمية",headline:"آفاق جديدة\nللمشاركة الرقمية.",intro:"تعمل MAGHREB TOKEN على بناء منظومة أصول رقمية تتمحور حول المجتمع، وتجمع بين المعرفة والمنفعة والثقافة والمشاركة الهادفة.",join:"انضم إلى ما قبل الإطلاق",explore:"اكتشف المشروع",status:"حالة المشروع",about:"مشروع يستشرف المستقبل",vision:"رؤية إقليمية بطموح عالمي",ecosystem:"منظومة واحدة وطرق متعددة للمشاركة",community:"المجتمع هو الأساس",market:"نظرة على السوق · عرض تجريبي",events:"لقاء المجتمع على أرض الواقع",roadmap:"الطريق نحو الإطلاق",prelaunch:"كن جزءاً من إطلاق 2027",poll:"صوت المجتمع",who:"من نحن",learn:"تعلّم قبل المشاركة",utility:"المنفعة قبل المضاربة",launch:"الإطلاق المستهدف · 2027",subscribe:"سجّل اهتمامك",email:"بريدك الإلكتروني",vote:"أرسل تصويتي",results:"عرض النتائج",next:"الفعالية القادمة",disclaimer:"بيئة مفاهيمية وتجريبية. أرقام السوق محاكاة وليست أسعاراً مباشرة أو نصيحة استثمارية. تخضع معايير العملة والشراكات والوضع التنظيمي ومواعيد الإطلاق للتأكيد."},
+  IT:{nav:["Progetto","MGT Coin","Ecosistema","Demo mercato","Community","Eventi","Chi siamo"],eyebrow:"IL PROSSIMO CAPITOLO DEL VALORE DIGITALE",headline:"Una nuova dimensione\ndi partecipazione digitale.",intro:"MAGHREB TOKEN sta costruendo un ecosistema di asset digitali orientato alla comunità, tra formazione, utilità, cultura e partecipazione.",join:"Partecipa al pre-lancio",explore:"Esplora il progetto",status:"STATO DEL PROGETTO",about:"Un progetto pensato per il futuro",vision:"Una visione regionale, uno sguardo globale",ecosystem:"Un ecosistema. Molti modi per partecipare.",community:"La community è la base",market:"Panoramica mercato · demo simulata",events:"Incontra la community",roadmap:"Il percorso verso il lancio",prelaunch:"Partecipa al lancio 2027",poll:"La voce della community",who:"Chi siamo",learn:"Impara prima di partecipare",utility:"Utilità prima della speculazione",launch:"LANCIO PREVISTO · 2027",subscribe:"Registra il tuo interesse",email:"Il tuo indirizzo email",vote:"Invia il voto",results:"Visualizza i risultati",next:"Prossimo evento",disclaimer:"Ambiente concettuale e dimostrativo. I dati di mercato sono simulati, non prezzi in tempo reale né consigli finanziari. Parametri, partnership, stato normativo e date sono da confermare."},
+  RU:{nav:["Проект","MGT Coin","Экосистема","Демо рынка","Сообщество","События","О нас"],eyebrow:"НОВАЯ ГЛАВА ЦИФРОВОЙ ЦЕННОСТИ",headline:"Новое измерение\nцифрового участия.",intro:"MAGHREB TOKEN создаёт ориентированную на сообщество экосистему цифровых активов, объединяющую образование, полезность, культуру и участие.",join:"В предзапуск",explore:"Изучить проект",status:"СТАТУС ПРОЕКТА",about:"Проект, устремлённый в будущее",vision:"Региональное видение с глобальным масштабом",ecosystem:"Одна экосистема. Много способов участия.",community:"Сообщество — основа проекта",market:"Обзор рынка · симуляция",events:"Встречи сообщества",roadmap:"Путь к запуску",prelaunch:"Станьте частью запуска 2027",poll:"Голос сообщества",who:"Кто мы",learn:"Изучайте перед участием",utility:"Польза прежде спекуляций",launch:"ПЛАНИРУЕМЫЙ ЗАПУСК · 2027",subscribe:"Оставить заявку",email:"Ваш email",vote:"Отправить голос",results:"Результаты",next:"Следующее событие",disclaimer:"Концепция и демонстрационная среда. Рыночные данные смоделированы, это не реальные котировки и не инвестиционная рекомендация. Параметры токена, партнёрства, регулирование и сроки требуют подтверждения."},
+  TR:{nav:["Proje","MGT Coin","Ekosistem","Piyasa demosu","Topluluk","Etkinlikler","Hakkımızda"],eyebrow:"DİJİTAL DEĞERİN YENİ BÖLÜMÜ",headline:"Dijital katılımda\nyeni bir boyut.",intro:"MAGHREB TOKEN; eğitim, fayda, kültür ve anlamlı katılımı bir araya getiren, topluluk odaklı bir dijital varlık ekosistemi kuruyor.",join:"Ön lansmana katıl",explore:"Projeyi keşfet",status:"PROJE DURUMU",about:"Gelecek için tasarlanan proje",vision:"Küresel bakış açılı bölgesel vizyon",ecosystem:"Tek ekosistem. Birçok katılım yolu.",community:"Topluluk temeldir",market:"Piyasa görünümü · simülasyon",events:"Toplulukla buluş",roadmap:"Lansmana giden yol",prelaunch:"2027 lansmanının parçası olun",poll:"Topluluğun sesi",who:"Biz kimiz",learn:"Katılmadan önce öğrenin",utility:"Spekülasyondan önce fayda",launch:"HEDEF LANSMAN · 2027",subscribe:"İlginizi kaydedin",email:"E-posta adresiniz",vote:"Oyumu gönder",results:"Sonuçları gör",next:"Sıradaki etkinlik",disclaimer:"Konsept ve demo ortamı. Piyasa verileri simülasyondur; canlı fiyat veya yatırım tavsiyesi değildir. Token parametreleri, ortaklıklar, düzenleyici durum ve tarihler doğrulanmalıdır."},
+  JA:{nav:["プロジェクト","MGT Coin","エコシステム","市場デモ","コミュニティ","イベント","私たちについて"],eyebrow:"デジタル価値の新章",headline:"デジタル参加の\n新しい次元へ。",intro:"MAGHREB TOKENは、教育、実用性、文化、意義ある参加をつなぐコミュニティ中心のデジタル資産エコシステムを構築しています。",join:"プレローンチに参加",explore:"プロジェクトを見る",status:"プロジェクト状況",about:"未来を見据えたプロジェクト",vision:"地域発、世界を見据えたビジョン",ecosystem:"ひとつのエコシステム。多様な参加方法。",community:"コミュニティが基盤",market:"マーケット概要・シミュレーション",events:"コミュニティイベント",roadmap:"ローンチまでの道のり",prelaunch:"2027年ローンチに参加",poll:"コミュニティの声",who:"私たちについて",learn:"参加する前に学ぶ",utility:"投機より実用性",launch:"ローンチ目標 · 2027",subscribe:"参加登録",email:"メールアドレス",vote:"投票する",results:"結果を見る",next:"次回イベント",disclaimer:"コンセプトおよびデモ環境です。市場数値はシミュレーションであり、ライブ価格や投資助言ではありません。トークン条件、提携、規制状況、日程は確認が必要です。"},
+  ES:{nav:["Proyecto","MGT Coin","Ecosistema","Demo de mercado","Comunidad","Eventos","Quiénes somos"],eyebrow:"EL PRÓXIMO CAPÍTULO DEL VALOR DIGITAL",headline:"Una nueva dimensión\nde participación digital.",intro:"MAGHREB TOKEN está creando un ecosistema de activos digitales centrado en la comunidad, conectando educación, utilidad, cultura y participación.",join:"Unirse al pre lanzamiento",explore:"Explorar el proyecto",status:"ESTADO DEL PROYECTO",about:"Un proyecto preparado para el futuro",vision:"Visión regional con perspectiva global",ecosystem:"Un ecosistema. Muchas formas de participar.",community:"La comunidad es la base",market:"Resumen del mercado · demo simulada",events:"Encuentros de la comunidad",roadmap:"El camino hacia el lanzamiento",prelaunch:"Forma parte del lanzamiento 2027",poll:"La voz de la comunidad",who:"Quiénes somos",learn:"Aprende antes de participar",utility:"Utilidad antes que especulación",launch:"LANZAMIENTO OBJETIVO · 2027",subscribe:"Registrar interés",email:"Tu correo electrónico",vote:"Enviar mi voto",results:"Ver resultados",next:"Próximo evento",disclaimer:"Entorno conceptual y demostrativo. Las cifras de mercado son simuladas, no precios en directo ni asesoramiento financiero. Parámetros, alianzas, situación regulatoria y fechas están pendientes de confirmación."},
+  PT:{nav:["Projeto","MGT Coin","Ecossistema","Demo de mercado","Comunidade","Eventos","Quem somos"],eyebrow:"O PRÓXIMO CAPÍTULO DO VALOR DIGITAL",headline:"Uma nova dimensão\nde participação digital.",intro:"A MAGHREB TOKEN está a criar um ecossistema de ativos digitais centrado na comunidade, ligando educação, utilidade, cultura e participação.",join:"Entrar no pré-lançamento",explore:"Explorar o projeto",status:"ESTADO DO PROJETO",about:"Um projeto preparado para o futuro",vision:"Visão regional com alcance global",ecosystem:"Um ecossistema. Muitas formas de participar.",community:"A comunidade é a base",market:"Visão do mercado · demo simulada",events:"Encontros da comunidade",roadmap:"O caminho para o lançamento",prelaunch:"Faça parte do lançamento de 2027",poll:"A voz da comunidade",who:"Quem somos",learn:"Aprenda antes de participar",utility:"Utilidade antes da especulação",launch:"LANÇAMENTO PREVISTO · 2027",subscribe:"Registar interesse",email:"O seu email",vote:"Enviar o meu voto",results:"Ver resultados",next:"Próximo evento",disclaimer:"Ambiente conceptual e demonstrativo. Os dados de mercado são simulados, não são preços em tempo real nem aconselhamento financeiro. Parâmetros, parcerias, estado regulatório e datas carecem de confirmação."},
+  ZH:{nav:["项目","MGT Coin","生态系统","市场演示","社区","活动","关于我们"],eyebrow:"数字价值的新篇章",headline:"数字参与的\n全新维度。",intro:"MAGHREB TOKEN 正在构建以社区为核心的数字资产生态系统，连接教育、实用价值、文化与有意义的参与。",join:"加入预发布",explore:"探索项目",status:"项目状态",about:"面向未来的项目",vision:"区域愿景，全球视野",ecosystem:"一个生态系统，多种参与方式。",community:"社区是根基",market:"市场概览 · 模拟演示",events:"与社区线下相聚",roadmap:"迈向发布之路",prelaunch:"参与 2027 年发布",poll:"社区之声",who:"关于我们",learn:"参与前先学习",utility:"实用价值优先于投机",launch:"目标发布 · 2027",subscribe:"登记意向",email:"您的电子邮箱",vote:"提交投票",results:"查看结果",next:"下一场活动",disclaimer:"概念与演示环境。市场数据为模拟数据，并非实时价格或投资建议。代币参数、合作关系、监管状态及时间表均有待确认。"},
+  DE:{nav:["Projekt","MGT Coin","Ökosystem","Marktdemo","Community","Events","Über uns"],eyebrow:"DAS NÄCHSTE KAPITEL DIGITALER WERTE",headline:"Eine neue Dimension\ndigitaler Teilhabe.",intro:"MAGHREB TOKEN entwickelt ein gemeinschaftsorientiertes Ökosystem digitaler Assets, das Bildung, Nutzen, Kultur und sinnvolle Beteiligung verbindet.",join:"Pre-Launch beitreten",explore:"Projekt entdecken",status:"PROJEKTSTATUS",about:"Ein Projekt mit Blick nach vorn",vision:"Regionale Vision mit globalem Blick",ecosystem:"Ein Ökosystem. Viele Wege zur Teilnahme.",community:"Die Community ist das Fundament",market:"Marktüberblick · simulierte Demo",events:"Die Community persönlich treffen",roadmap:"Der Weg zum Launch",prelaunch:"Teil des Launches 2027 werden",poll:"Die Stimme der Community",who:"Wer wir sind",learn:"Erst lernen, dann teilnehmen",utility:"Nutzen vor Spekulation",launch:"GEPLANTER LAUNCH · 2027",subscribe:"Interesse anmelden",email:"Ihre E-Mail-Adresse",vote:"Stimme abgeben",results:"Ergebnisse ansehen",next:"Nächstes Event",disclaimer:"Konzept- und Demo-Umgebung. Marktdaten sind simuliert, keine Live-Kurse oder Anlageberatung. Token-Parameter, Partnerschaften, regulatorischer Status und Zeitplan müssen bestätigt werden."}
 };
 
+const photos = [
+  ["Dubai · global connections","https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=85"],
+  ["Casablanca · roots & ambition","https://images.unsplash.com/photo-1539020140153-e479b8c22e70?auto=format&fit=crop&w=1200&q=85"],
+  ["Digital infrastructure","https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=85"],
+  ["Community & culture","https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=85"],
+];
+const market = [18,22,20,27,24,31,29,36,33,42,39,48,45,54,51,61,58,68,65,76,72,84,81,94];
+
 export default function Home() {
-  const [lang, setLang] = useState<"EN" | "FR">("EN");
-  const t = copy[lang];
-  return (
-    <main className="site-shell">
-      <header className="topbar">
-        <a className="brand" href="#" aria-label="Maghreb Token home"><span className="brand-mark">M</span><span>MAGHREB<span className="gold"> TOKEN</span><small>DIGITAL ASSET ECOSYSTEM</small></span></a>
-        <nav>{t.nav.map((item, i) => <a key={item} href={["#coin", "#ecosystem", "#community", "#roadmap"][i]}>{item}</a>)}</nav>
-        <div className="top-actions"><div className="language"><button className={lang === "EN" ? "active" : ""} onClick={() => setLang("EN")}>EN</button><button className={lang === "FR" ? "active" : ""} onClick={() => setLang("FR")}>FR</button></div><a className="outline-button" href="#community">Join community <span>↗</span></a></div>
-      </header>
+  const [lang,setLang] = useState<Lang>("EN");
+  const [menu,setMenu] = useState(false);
+  const [poll,setPoll] = useState("Casablanca");
+  const [voted,setVoted] = useState(false);
+  const [email,setEmail] = useState("");
+  const [submitted,setSubmitted] = useState(false);
+  const [marketRange,setMarketRange] = useState("30D");
+  const [cursor,setCursor] = useState({x:0,y:0});
+  const [adminOpen,setAdminOpen] = useState(false);
+  const t=translations[lang];
+  const rtl=lang==="AR";
+  const chart=useMemo(()=>market.map((v,i)=>Math.max(8, v + (marketRange==="7D"?Math.sin(i)*7:marketRange==="1Y"?Math.cos(i/2)*13:0))),[marketRange]);
+  useEffect(()=>{
+    const move=(e:MouseEvent)=>setCursor({x:e.clientX,y:e.clientY});
+    window.addEventListener("mousemove",move,{passive:true});
+    return ()=>window.removeEventListener("mousemove",move);
+  },[]);
+  const navIds=["project","coin","ecosystem","market","community","events","who"];
+  return <main className="mgt-site" dir={rtl?"rtl":"ltr"} style={{"--mx":cursor.x+"px","--my":cursor.y+"px"} as React.CSSProperties}>
+    <div className="cursor-aura" />
+    <div className="ambient ambient-one"/><div className="ambient ambient-two"/>
+    <header className="mgt-header">
+      <a className="mgt-brand" href="#project"><span className="brand-symbol">M</span><span><b>MAGHREB <i>TOKEN</i></b><small>DIGITAL ASSET ECOSYSTEM</small></span></a>
+      <nav className={menu?"nav-open":""}>{t.nav.map((n,i)=><a key={n} href={"#"+navIds[i]} onClick={()=>setMenu(false)}>{n}</a>)}</nav>
+      <div className="header-right">
+        <select aria-label="Language" value={lang} onChange={e=>setLang(e.target.value as Lang)}>{languages.map(([code,name])=><option value={code} key={code}>{code} · {name}</option>)}</select>
+        <a className="gold-cta small-cta" href="#prelaunch">{t.join}<span>↗</span></a>
+        <button className="menu-toggle" onClick={()=>setMenu(!menu)} aria-label="Toggle menu">☰</button>
+      </div>
+    </header>
 
-      <section className="hero">
-        <div className="hero-copy">
-          <div className="eyebrow"><span className="pulse" />{t.eyebrow}</div>
-          <h1>{t.title.split("\n").map((line, i) => <span key={i}>{line}{i === 0 && <br />}</span>)}</h1>
-          <p>{t.intro}</p>
-          <div className="hero-buttons"><a className="gold-button" href="#ecosystem">{t.explore} <span>↗</span></a><a className="text-link" href="#coin">{t.learn} <span>→</span></a></div>
-          <div className="status"><span>{t.label}</span><strong><i />{t.status}</strong></div>
-        </div>
-        <div className="coin-stage" aria-label="Abstract gold MGT coin artwork">
-          <div className="orbit orbit-one" /><div className="orbit orbit-two" /><div className="coin-shadow" />
-          <div className="coin"><div className="coin-inner"><span className="coin-star">✳</span><strong>M</strong><span className="coin-word">MAGHREB TOKEN</span><small>MGT · DIGITAL ASSET</small></div></div>
-          <div className="float-tag tag-top">MGT <b>◆</b> ECOSYSTEM</div><div className="float-tag tag-bottom">BUILT AROUND UTILITY</div>
-        </div>
-        <div className="hero-index"><span>01 / 04</span><span>SCROLL TO EXPLORE ↓</span></div>
-      </section>
+    <section className="hero-lux" id="project">
+      <div className="hero-lux-copy">
+        <div className="eyebrow-lux"><span/> {t.eyebrow}</div>
+        <h1>{t.headline.split("\n").map((s,i)=><span key={i}>{s}</span>)}</h1>
+        <p>{t.intro}</p>
+        <div className="hero-ctas"><a className="gold-cta" href="#prelaunch">{t.join}<span>↗</span></a><a className="ghost-cta" href="#ecosystem">{t.explore}<span>↓</span></a></div>
+        <div className="launch-chip"><span className="live-dot"/> {t.launch}<b>•</b> {t.status}: CONCEPT / PRE-LAUNCH</div>
+      </div>
+      <div className="hero-art">
+        <div className="hero-ring ring-a"/><div className="hero-ring ring-b"/><div className="hero-ring ring-c"/>
+        <div className="hero-coin"><div className="coin-rim"><div className="coin-core"><span>✳</span><b>M</b><small>MAGHREB TOKEN</small><em>MGT · 2027</em></div></div></div>
+        <div className="glass-float float-one"><small>ECOSYSTEM</small><b>01 / 04</b></div>
+        <div className="glass-float float-two"><small>COMMUNITY POWER</small><b>Built together</b></div>
+        <div className="hero-orbit-dot"/>
+      </div>
+      <div className="hero-bottom"><span>01 — A NEW DIGITAL FRONTIER</span><span>SCROLL TO DISCOVER ↓</span><span>CASABLANCA · DUBAI · MILANO</span></div>
+    </section>
 
-      <section className="intro-strip"><span>01 — THE VISION</span><p>Digital value, designed around <em>participation.</em></p><span>MAGHREB TOKEN / MGT</span></section>
+    <section className="ticker"><div>{Array.from({length:4},(_,i)=><span key={i}>MGT · UTILITY · COMMUNITY · EDUCATION · CULTURE · 2027 · </span>)}</div></section>
 
-      <section className="feature-grid" id="coin">
-        <article className="feature-card feature-main"><div className="card-kicker">01 / THE ASSET</div><div className="mini-emblem">M</div><h2>{t.coin}</h2><p>{t.coinText}</p><a href="#roadmap">Explore the concept <span>↗</span></a></article>
-        <article className="feature-card" id="ecosystem"><div className="card-kicker">02 / THE PLATFORM</div><div className="line-icon">⌘</div><h2>{t.ecosystem}</h2><p>{t.ecosystemText}</p><ul>{t.pillars.map(x => <li key={x}><span>✳</span>{x}</li>)}</ul></article>
-        <article className="feature-card" id="community"><div className="card-kicker">03 / THE PEOPLE</div><div className="line-icon">◎</div><h2>{t.community}</h2><p>{t.communityText}</p><a href="https://t.me/" target="_blank" rel="noreferrer">Community channel <span>↗</span></a><small className="note">Official community link to be configured.</small></article>
-      </section>
+    <section className="section-intro" id="coin"><div className="section-tag">01 / {t.about}</div><div className="intro-columns"><h2>{t.vision}</h2><p>Born from a North African perspective and designed for international conversations, MAGHREB TOKEN aims to connect people, knowledge and digital utility. The project roadmap prioritises transparency, education, community participation and responsible development.</p></div>
+      <div className="photo-mosaic"><div className="photo-large" style={{backgroundImage:"url("+photos[0][1]+")"}}><span>DUBAI / GLOBAL OUTLOOK</span></div><div className="photo-stack"><div style={{backgroundImage:"url("+photos[1][1]+")"}}><span>CASABLANCA / OUR ROOTS</span></div><div style={{backgroundImage:"url("+photos[2][1]+")"}}><span>TECHNOLOGY / INFRASTRUCTURE</span></div></div></div>
+    </section>
 
-      <section className="roadmap" id="roadmap"><div><div className="eyebrow">04 — THE JOURNEY</div><h2>{t.roadmap}</h2><p>{t.roadmapText}</p></div><div className="roadmap-steps"><div><b>01</b><span>Foundation</span><small>Concept definition</small></div><div><b>02</b><span>Build</span><small>Platform development</small></div><div><b>03</b><span>Connect</span><small>Community & utility</small></div><div><b>04</b><span>Expand</span><small>Future integrations</small></div></div></section>
+    <section className="story-grid"><article className="story-card story-gold"><span className="section-tag">02 / THE TOKEN</span><div className="story-icon">◈</div><h3>MGT Coin</h3><p>A proposed ecosystem utility token concept. Its final utility, distribution, supply, governance and technical parameters will be published only after formal review and approval.</p><a href="#roadmap">Explore token framework ↗</a></article><article className="story-card"><span className="section-tag">03 / THE ECOSYSTEM</span><div className="story-icon">⌘</div><h3>{t.ecosystem}</h3><p>Education, digital identity concepts, community access, events, missions and future partner integrations — designed as connected experiences, not isolated features.</p><a href="#community">Discover the ecosystem ↗</a></article><article className="story-card"><span className="section-tag">04 / LEARN & GROW</span><div className="story-icon">✧</div><h3>{t.learn}</h3><p>Explore explainers, webinars, community sessions and transparent project updates. Progress through learning and contribution, not by buying ranks or depositing funds.</p><a href="#levels">Discover community levels ↗</a></article></section>
 
-      <section className="locations"><span>GLOBAL OUTLOOK</span><div><b>Dubai</b><i>✳</i><b>Casablanca</b><i>✳</i><b>Milano</b></div></section>
-      <footer><a className="brand" href="#"><span className="brand-mark">M</span><span>MAGHREB<span className="gold"> TOKEN</span><small>DIGITAL ASSET ECOSYSTEM</small></span></a><p>{t.footer}</p><span>© 2026 MAGHREB TOKEN · MGT</span></footer>
-    </main>
-  );
+    <section className="market-section" id="market"><div className="market-heading"><div><span className="section-tag">05 / MARKET INTELLIGENCE</span><h2>{t.market}</h2><p>A visual sandbox to demonstrate how a market dashboard could work. Every figure below is illustrative sample data.</p></div><div className="demo-stamp">SIMULATED DATA<br/>NOT LIVE MARKET DATA</div></div>
+      <div className="market-dashboard glass-panel"><div className="market-top"><div><small>DEMO ASSET</small><h3>MGT / DEMO INDEX</h3><p>Illustrative index · not a tradable quote</p></div><div className="market-value"><b>1.284</b><span className="positive">+4.82% <small>sample period</small></span></div></div>
+        <div className="chart-toolbar">{["7D","30D","1Y"].map(x=><button key={x} className={marketRange===x?"selected":""} onClick={()=>setMarketRange(x)}>{x}</button>)}<span>DEMO SERIES · INDEX UNITS</span></div>
+        <div className="chart-area"><div className="chart-y"><span>100</span><span>75</span><span>50</span><span>25</span><span>0</span></div><svg viewBox="0 0 720 220" preserveAspectRatio="none" role="img" aria-label="Illustrative market index chart"><defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#d8b66c" stopOpacity=".32"/><stop offset="100%" stopColor="#d8b66c" stopOpacity="0"/></linearGradient></defs><path d={"M "+chart.map((v,i)=>(i*720/(chart.length-1))+" "+(205-v*1.85)).join(" L ")+" L 720 220 L 0 220 Z"} fill="url(#chartFill)"/><path d={"M "+chart.map((v,i)=>(i*720/(chart.length-1))+" "+(205-v*1.85)).join(" L ")} fill="none" stroke="#dfbf78" strokeWidth="2.5" vectorEffect="non-scaling-stroke"/></svg></div>
+        <div className="market-stats"><div><small>DEMO VOLUME</small><b>24.8M <i>sample</i></b></div><div><small>DEMO MARKET CAP</small><b>$128.4M <i>sample</i></b></div><div><small>DEMO SENTIMENT</small><b>Positive <i>illustrative</i></b></div><div><small>DATA SOURCE</small><b>Simulation <i>not connected</i></b></div></div>
+      </div>
+      <div className="market-note">No live exchange connection is active in this demonstration. No trading, deposits, withdrawals or financial transactions are enabled.</div>
+    </section>
+
+    <section className="binance-band"><div className="binance-mark">B</div><div><span className="section-tag">INTEGRATION READINESS</span><h3>Exchange connectivity, built with care.</h3><p>Binance API integration is shown as a future technical pathway. Any official approval, listing, partnership or exchange relationship must be independently verified before it is presented as confirmed.</p></div><span className="approval-pill">STATUS: VERIFICATION REQUIRED</span></section>
+
+    <section className="community-section" id="community"><div className="community-copy"><span className="section-tag">06 / {t.community}</span><h2>{t.community}</h2><p>A community shaped by curiosity, shared learning and constructive contribution. Take part in discussions, vote on community priorities, join a webinar or follow the project’s next milestones.</p><div className="community-links"><a href="https://t.me/" target="_blank" rel="noreferrer">Telegram community ↗</a><a href="#prelaunch">Join the pre-launch list ↗</a></div></div><div className="poll-card glass-panel"><span className="section-tag">COMMUNITY POLL / DEMO</span><h3>Where should the next MGT community gathering happen?</h3><p>Choose the city you would most like us to prioritise.</p>{["Casablanca","Dubai","Milano","Online global session"].map(x=><label className={"poll-option "+(poll===x?"chosen":"")} key={x}><input type="radio" name="city-poll" value={x} checked={poll===x} onChange={()=>{setPoll(x);setVoted(false)}}/><span>{x}</span><i>{x==="Casablanca"?"01":x==="Dubai"?"02":x==="Milano"?"03":"04"}</i></label>)}<button className="gold-cta poll-submit" onClick={()=>setVoted(true)}>{t.vote} ↗</button>{voted&&<p className="inline-confirm">Thank you. Your demo vote is recorded locally for this session only.</p>}</div></section>
+
+    <section className="levels-section" id="levels"><div className="levels-heading"><span className="section-tag">07 / COMMUNITY JOURNEY</span><h2>Earn your place through participation.</h2><p>Six community levels designed to recognise learning, contribution and positive engagement. Levels are illustrative and are not linked to deposits, token purchases or guaranteed rewards.</p></div><div className="levels-row">{[["01","Bronze","Start learning"],["02","Silver","Join the conversation"],["03","Gold","Contribute consistently"],["04","Platinum","Support initiatives"],["05","Diamond","Lead by example"],["06","Royal","Community distinction"]].map((x,i)=><div className={"level level-"+i} key={x[1]}><span>{x[0]}</span><b>{x[1]}</b><small>{x[2]}</small><i>{["●","◆","✦","⬡","✧","♛"][i]}</i></div>)}</div><div className="drop-note"><b>NEXT DROP / ANNOUNCEMENT COMING SOON</b><span>New missions, badges and community recognition mechanics will be announced after programme approval.</span></div></section>
+
+    <section className="events-section" id="events"><div className="events-heading"><div><span className="section-tag">08 / IRL & DIGITAL GATHERINGS</span><h2>{t.events}</h2><p>Meet, learn, exchange perspectives and help shape the next chapter.</p></div><a href="#prelaunch">Get event updates ↗</a></div><div className="event-grid"><article className="event-card casablanca"><div className="event-image" style={{backgroundImage:"url("+photos[1][1]+")"}}/><div className="event-info"><span className="event-status">COMING SOON</span><small>COMMUNITY MEETUP · MOROCCO</small><h3>Casablanca</h3><p>Our next community gathering. Date, venue and registration details will be announced.</p><a href="#prelaunch">Notify me ↗</a></div></article><article className="event-card dubai"><div className="event-image" style={{backgroundImage:"url("+photos[0][1]+")"}}/><div className="event-info"><span className="event-status">COMING SOON</span><small>GLOBAL COMMUNITY · UAE</small><h3>Dubai</h3><p>A future meeting point for community, ecosystem conversations and partner discovery.</p><a href="#prelaunch">Notify me ↗</a></div></article><article className="event-card webinar"><div className="event-image" style={{backgroundImage:"url("+photos[3][1]+")"}}/><div className="event-info"><span className="event-status">PROGRAMME IN PREPARATION</span><small>ONLINE · WEBINAR SERIES</small><h3>MGT Sessions</h3><p>Project explainers, digital asset literacy and open community Q&amp;A sessions.</p><a href="#prelaunch">Get webinar updates ↗</a></div></article></div></section>
+
+    <section className="media-section"><div className="media-heading"><span className="section-tag">09 / WATCH & DISCOVER</span><h2>Stories, explainers & conversations.</h2><p>Four planned film formats, each intended for Arabic, French and English editions. Media slots are placeholders until approved production assets are uploaded.</p></div><div className="video-grid">{[["01","Brand film","The story and ambition of MAGHREB TOKEN"],["02","MGT explained","The concept, token framework and responsible participation"],["03","Ecosystem film","Technology, utility and future integrations"],["04","Community film","People, events and shared progress"]].map((x,i)=><article className="video-card" key={x[0]}><div className={"video-poster poster-"+i}><span className="play-button">▶</span><small>FILM {x[0]} · COMING SOON</small></div><b>{x[1]}</b><p>{x[2]}</p><div className="video-langs">ARABIC <i/> FRENCH <i/> ENGLISH</div></article>)}</div></section>
+
+    <section className="who-section" id="who"><div className="who-photo" style={{backgroundImage:"url("+photos[3][1]+")"}}><span>PEOPLE · IDEAS · PROGRESS</span></div><div className="who-copy"><span className="section-tag">10 / {t.who}</span><h2>Rooted in the region.<br/><em>Open to the world.</em></h2><p>MAGHREB TOKEN is a project in development, shaped around a simple ambition: make digital asset concepts more understandable, accessible and connected to real communities. The team, legal entity, governance structure and official partner details will be published here once formally confirmed.</p><div className="who-facts"><div><b>03</b><small>FOCUS CITIES</small></div><div><b>11</b><small>LANGUAGES PLANNED</small></div><div><b>2027</b><small>TARGET LAUNCH</small></div></div></div></section>
+
+    <section className="roadmap-section" id="roadmap"><div><span className="section-tag">11 / THE ROAD AHEAD</span><h2>{t.roadmap}</h2><p>Indicative phases. Dates, scope and launch conditions remain subject to governance, technical, legal and operational review.</p></div><div className="roadmap-list">{[["2026","Foundation","Project architecture, community discovery, brand and governance definition"],["Q1–Q2 2027","Build & educate","Platform development, educational content, community pilots and webinars"],["Q3 2027","Pre-launch phase","Public updates, readiness checks, events and approved participation mechanics"],["2027","Target launch","Launch only when technical, legal and operational conditions are satisfied"]].map((x,i)=><div className="roadmap-item" key={x[0]}><b>{x[0]}</b><span><strong>{x[1]}</strong><small>{x[2]}</small></span><i>{i===3?"TARGET":"PHASE 0"+(i+1)}</i></div>)}</div></section>
+
+    <section className="prelaunch-section" id="prelaunch"><div className="prelaunch-glow"/><div className="prelaunch-copy"><span className="section-tag">12 / EARLY ACCESS</span><h2>{t.prelaunch}<br/><em>Before the world arrives.</em></h2><p>Register your interest to receive project announcements, event invitations, webinar notices and the official launch updates. Registration does not create a wallet, allocate tokens or guarantee access to any future offering.</p><div className="prelaunch-points"><span>✦ Project updates</span><span>✦ Event invitations</span><span>✦ Webinar access</span></div></div><form className="prelaunch-form glass-panel" onSubmit={e=>{e.preventDefault();setSubmitted(true)}}><span className="section-tag">MGT · 2027</span><h3>{t.subscribe}</h3><label htmlFor="prelaunch-email">{t.email}</label><input id="prelaunch-email" type="email" required placeholder="name@example.com" value={email} onChange={e=>setEmail(e.target.value)}/><label className="consent"><input type="checkbox" required/> I agree to receive project updates. I can unsubscribe at any time.</label><button className="gold-cta" type="submit">Register interest ↗</button>{submitted&&<p className="inline-confirm">Thank you — this front-end demo has captured your entry locally. Connect the approved backend before collecting real registrations.</p>}<small>Demo form only · no information is sent or stored on a server.</small></form></section>
+
+    <section className="admin-preview"><div><span className="section-tag">PLATFORM OPERATIONS</span><h2>Built to be managed responsibly.</h2><p>Role-based workspace concept for platform governance, content, community, events, polls, missions and pre-launch registrations.</p></div><div className="admin-cards"><button onClick={()=>setAdminOpen(!adminOpen)} className="admin-card"><span>♛</span><b>Superadmin</b><small>Full platform control · users · roles · configuration · audit</small><i>{adminOpen?"Close preview ↑":"Preview workspace ↗"}</i></button><div className="admin-card"><span>◇</span><b>Admin</b><small>Content · community · events · missions · support operations</small><i>Restricted permissions</i></div><div className="admin-card"><span>◎</span><b>Member</b><small>Profile · learning · community · XP · achievements</small><i>Member experience</i></div></div>{adminOpen&&<div className="admin-demo-panel glass-panel"><b>ADMIN WORKSPACE — VISUAL PREVIEW ONLY</b><span>Dashboard overview</span><span>Pre-launch registrations · content library · events & webinars · poll management · community missions · role permissions · audit log</span><small>Authentication and server-side RBAC must be connected before this workspace can be used operationally.</small></div>}</section>
+
+    <footer className="mgt-footer"><a className="mgt-brand" href="#project"><span className="brand-symbol">M</span><span><b>MAGHREB <i>TOKEN</i></b><small>DIGITAL ASSET ECOSYSTEM</small></span></a><div className="footer-links"><a href="#project">Project</a><a href="#roadmap">Roadmap</a><a href="#events">Events</a><a href="https://t.me/" target="_blank" rel="noreferrer">Telegram ↗</a></div><p>{t.disclaimer}</p><small>© 2026 MAGHREB TOKEN · MGT · CONCEPT DEMONSTRATION</small></footer>
+  </main>;
 }
