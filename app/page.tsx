@@ -62,7 +62,7 @@ export default function Home() {
       <nav className={menu?"nav-open":""}>{t.nav.map((n,i)=><a key={n} href={"#"+navIds[i]} onClick={()=>setMenu(false)}>{n}</a>)}</nav>
       <div className="header-right">
         <select aria-label="Language" value={lang} onChange={e=>setLang(e.target.value as Lang)}>{languages.map(([code,name])=><option value={code} key={code}>{code} · {name}</option>)}</select>
-        <a className="gold-cta small-cta" href="#prelaunch">{t.join}<span>↗</span></a>
+        <a className="control-entry" href="/control">CONTROL ROOM ↗</a><a className="gold-cta small-cta" href="#prelaunch">{t.join}<span>↗</span></a>
         <button className="menu-toggle" onClick={()=>setMenu(!menu)} aria-label="Toggle menu">☰</button>
       </div>
     </header>
