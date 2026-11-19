@@ -1,0 +1,12 @@
+"use client";
+import {useEffect,useState} from "react";
+import Link from "next/link";
+import {useRouter} from "next/navigation";
+import {createClient} from "@/lib/supabase/client";
+type Affiliate={id:string;display_name:string;code:string;status:string;commission_rate:number;referrals:number;conversions:number};
+export default function AffiliateManager(){const router=useRouter();const [rows,setRows]=useState<Affiliate[]>([]);const [error,setError]=useState("");
+async function load(){const s=createClient();const {data:claims}=await s.auth.getClaims();if(!claims?.claims){router.replace("/control/login");return;}const {data,error}=await s.rpc("mgt_admin_affiliates");if(error)setError(error.message);else setRows(data as Affiliate[]);}
+useEffect(()=>{void load();},[]);
+async function update(id:string,status:string,rate:number){const s=createClient();const {error}=await s.rpc("mgt_review_affiliate",{p_id:id,p_status:status,p_rate:rate});setError(error?.message||"Affiliate status updated.");if(!error)await load();}
+return <main className="control-app"><aside className="control-sidebar"><Link href="/control" className="mgt-brand"><span className="brand-symbol">M</span><b>MGT CONTROL</b></Link><Link href="/control">← Command centre</Link><Link href="/control/pages">Landing page CMS</Link><Link className="active" href="/control/affiliates">Affiliate management</Link></aside><section className="control-main"><div className="section-tag">PARTNER NETWORK · ADMIN</div><h1>Affiliate management</h1><p className="control-disclaimer">Approve partners and set their commission terms. Commissions are internal records only; no payout processor is connected.</p>{error&&<p className="form-success">{error}</p>}<div className="control-table-wrap"><table className="control-table"><thead><tr><th>PARTNER</th><th>REFERRAL CODE</th><th>REFERRALS</th><th>CONVERSIONS</th><th>RATE</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody>{rows.map(a=><tr key={a.id}><td><b>{a.display_name}</b></td><td>{a.code}</td><td>{a.referrals}</td><td>{a.conversions}</td><td>{a.commission_rate}%</td><td>{a.status}</td><td><div className="control-actions"><button onClick={()=>update(a.id,"active",a.commission_rate)}>Approve</button><button onClick={()=>update(a.id,"suspended",a.commission_rate)}>Suspend</button></div></td></tr>)}{rows.length===0&&<tr><td colSpan={7}>No affiliate applications yet.</td></tr>}</tbody></table></div></section></main>;
+}
