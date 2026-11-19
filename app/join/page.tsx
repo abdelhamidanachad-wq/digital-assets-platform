@@ -1,17 +1,19 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { MgtHeader } from "@/components/mgt-header";
 
 export default function JoinPage() {
   const [form,setForm] = useState({name:"",email:"",country:"",interest:"general",consent:false});
+  const [referral,setReferral] = useState("");
+  useEffect(()=>{setReferral(new URLSearchParams(window.location.search).get("ref") || "");},[]);
   const [state,setState] = useState<"idle"|"sending"|"success"|"error">("idle");
   const [message,setMessage] = useState("");
   async function submit(e:React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); setState("sending"); setMessage("");
     const supabase=createClient();
-    const {error}=await supabase.rpc("mgt_submit_invitation",{p_full_name:form.name,p_email:form.email,p_country:form.country,p_interest:form.interest,p_consent:form.consent});
+    const {error}=await supabase.rpc("mgt_submit_invitation",{p_full_name:form.name,p_email:form.email,p_country:form.country,p_interest:form.interest,p_consent:form.consent,p_referral_code:referral || null});
     if(error){setState("error");setMessage(error.message.includes("duplicate")?"An invitation request already exists for this email.":"We could not submit your request. Please check your details and try again.");return;}
     setState("success");setMessage("Your request has been received. The MGT team can review it through the private console.");
   }
