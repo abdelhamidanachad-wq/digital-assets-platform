@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 
 type Invite={id:string;full_name:string;email:string;country:string|null;interest:string|null;status:string;created_at:string};
 type Snapshot={invitation_total:number;invitation_pending:number;staff_total:number;affiliate_total:number;affiliate_pending:number;roadmap:number;recent_invitations:Invite[];staff:{email:string;role:string;status:string;created_at:string}[]};
-const sections=[["Overview","/control"],["Landing pages","/investors"],["Invitations","/control#invitations"],["Affiliates","/affiliate"],["Token & roadmap","/control#project-data"],["Security & roles","/control#access"]];
+const sections=[["Overview","/control"],["Landing page CMS","/control/pages"],["Affiliate management","/control/affiliates"],["Staff & roles","/control/staff"],["Invitation requests","/control#invitations"],["Token & roadmap","/control#project-data"]];
 export default function ControlPage(){
  const router=useRouter();const [data,setData]=useState<Snapshot|null>(null);const [error,setError]=useState("");const [busy,setBusy]=useState<string|null>(null);
  async function load(){const supabase=createClient();const {data:claims}=await supabase.auth.getClaims();if(!claims?.claims){router.replace("/control/login");return;}const {data,error}=await supabase.rpc("mgt_admin_overview");if(error){setError("This account is authenticated but is not authorised for the MGT control centre.");return;}setData(data as Snapshot);}
